@@ -68,7 +68,7 @@ jobs:
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
-          args: '--ignore-tests --out-dir coverage'
+          args: '--ignore-tests --output-dir coverage'
           out-type: 'Lcov'
 
       - name: Upload coverage
