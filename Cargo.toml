@@ -7,7 +7,10 @@ edition = "2018"
 [dependencies]
 actix-rt = "1.1.1"
 actix-web = { version = "3.3.2", default-features = false, features = [ "rustls" ] }
+config = "0.10.1"
+serde = { version = "1.0.118", features = [ "derive" ] }
+sqlx = { version = "0.4.2", default-features = false, features = [ "runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate" ] }
 
 [dev-dependencies]
-reqwest = "0.10.10"
+reqwest = { version = "0.10.10", default-features = false, features = [ "rustls-tls" ] }
 tokio = { version = "1.0.1", features = ["rt-multi-thread"] }
