@@ -1,6 +1,6 @@
 use my_cms::{configuration::get_configuration, run};
-use sqlx::{Connection, PgConnection};
-use std::{net::TcpListener, sync::Arc};
+use sqlx::PgPool;
+use std::net::TcpListener;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -8,7 +8,7 @@ async fn main() -> std::io::Result<()> {
     let address = format!("127.0.0.1:{}", configuration.app_port);
 
     let listener = TcpListener::bind(address)?;
-    let connection = PgConnection::connect(&configuration.database.connection_string()).await.unwrap();
+    let connection = PgPool::connect(&configuration.database.connection_string()).await.unwrap();
 
-    run(listener, Arc::new(connection))?.await
+    run(listener, connection)?.await
 }

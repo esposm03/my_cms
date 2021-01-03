@@ -1,15 +1,17 @@
 use actix_web::{dev::Server, web, App, HttpServer};
-use sqlx::PgConnection;
-use std::{io, net::TcpListener, sync::Arc};
+use sqlx::PgPool;
+use std::{io, net::TcpListener};
 
 use crate::routes;
 
-pub fn run(listener: TcpListener, db_conn: Arc<PgConnection>) -> Result<Server, io::Error> {
+pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, io::Error> {
+    let db_pool = web::Data::new(db_pool);
+
     let server = HttpServer::new(move || {
         App::new()
             .route("/health_check", web::get().to(routes::health_check))
             .route("/post", web::post().to(routes::create_post))
-            .data(db_conn.clone())
+            .app_data(db_pool.clone())
     })
     .listen(listener)?
     .run();

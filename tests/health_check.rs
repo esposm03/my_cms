@@ -1,14 +1,14 @@
 use my_cms::{configuration::get_configuration, run};
-use sqlx::{Connection, PgConnection};
+use sqlx::PgPool;
 use std::net::TcpListener;
 
 #[actix_rt::test]
 async fn health_check_works() {
-    let address = spawn_app();
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
 
     let response = client
-        .get(&format!("{}/health_check", address))
+        .get(&format!("{}/health_check", app.address))
         .send()
         .await
         .expect("Failed to execute request");
@@ -19,14 +19,11 @@ async fn health_check_works() {
 
 #[actix_rt::test]
 async fn create_post_valid() {
-    let app_address = spawn_app();
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
-    let config = get_configuration().expect("Failed to read configuration");
-    let conn_string = config.database.connection_string();
-    let mut db_connection = PgConnection::connect(&conn_string).await.unwrap();
 
     let response = client
-        .post(&format!("{}/post", app_address))
+        .post(&format!("{}/post", app.address))
         .body(r#"{"title": "lorem ipsum", "content": "dolor sit amet"}"#)
         .header("Content-Type", "application/json")
         .send()
@@ -36,7 +33,7 @@ async fn create_post_valid() {
     assert_eq!(response.status(), 200);
 
     let saved = sqlx::query!("SELECT title, content FROM posts")
-        .fetch_one(&mut db_connection)
+        .fetch_one(&app.db_pool)
         .await
         .unwrap();
 
@@ -46,7 +43,7 @@ async fn create_post_valid() {
 
 #[actix_rt::test]
 async fn create_post_missing_fields() {
-    let address = spawn_app();
+    let app = spawn_app().await;
     let client = reqwest::Client::new();
 
     let test_cases = [
@@ -57,7 +54,7 @@ async fn create_post_missing_fields() {
 
     for (body, error_message) in &test_cases {
         let response = client
-            .post(&format!("{}/post", address))
+            .post(&format!("{}/post", app.address))
             .body(*body)
             .header("Content-Type", "application/json")
             .send()
@@ -75,11 +72,23 @@ async fn create_post_missing_fields() {
 
 /// Run an instance of our API, without blocking the current thread,
 /// and return its address
-fn spawn_app() -> String {
+async fn spawn_app() -> TestApp {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Can't bind to random port");
     let port = listener.local_addr().unwrap().port();
+    let config = get_configuration().unwrap();
 
-    actix_rt::spawn(async { run(listener).unwrap().await.unwrap() });
+    let db_pool = PgPool::connect(&config.database.connection_string()).await.unwrap();
+    let clone = db_pool.clone();
 
-    format!("http://127.0.0.1:{}", port)
+    actix_rt::spawn(async move { run(listener, clone).unwrap().await.unwrap() });
+
+    TestApp {
+        address: format!("http://127.0.0.1:{}", port),
+        db_pool
+    }
+}
+
+pub struct TestApp {
+    pub address: String,
+    pub db_pool: PgPool,
 }

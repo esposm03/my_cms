@@ -1,11 +1,10 @@
-use std::sync::Arc;
 use actix_web::{web, HttpResponse};
-use sqlx::PgConnection;
+use sqlx::PgPool;
 use uuid::Uuid;
 use chrono::Utc;
 use std::ops::Deref;
 
-pub async fn create_post(post: web::Json<PostData>, connection: web::Data<Arc<PgConnection>>) -> Result<HttpResponse, HttpResponse> {
+pub async fn create_post(post: web::Json<PostData>, connection: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
     sqlx::query!(
         r#"
         INSERT INTO posts (id, title, content, created)
@@ -21,7 +20,7 @@ pub async fn create_post(post: web::Json<PostData>, connection: web::Data<Arc<Pg
     .map_err(|e| {
         eprintln!("Failed to execute query: {}", e);
         HttpResponse::InternalServerError().finish()
-    });
+    })?;
 
     Ok(HttpResponse::Ok().finish())
 }
