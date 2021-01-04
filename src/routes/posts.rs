@@ -13,7 +13,7 @@ pub async fn create_post(post: web::Json<PostData>, connection: web::Data<PgPool
         Uuid::new_v4(),
         post.title,
         post.content,
-        Utc::now()
+        Utc::now(),
     )
     .execute(connection.get_ref().deref())
     .await

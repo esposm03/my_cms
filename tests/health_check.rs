@@ -1,5 +1,6 @@
-use my_cms::{configuration::get_configuration, run};
-use sqlx::PgPool;
+use my_cms::{configuration::{DatabaseSettings, get_configuration}, run};
+use sqlx::{Connection, Executor, PgConnection, PgPool};
+use uuid::Uuid;
 use std::net::TcpListener;
 
 #[actix_rt::test]
@@ -71,21 +72,47 @@ async fn create_post_missing_fields() {
 }
 
 /// Run an instance of our API, without blocking the current thread,
-/// and return its address
+/// and return its address. Each instance will have its own logical database
 async fn spawn_app() -> TestApp {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Can't bind to random port");
     let port = listener.local_addr().unwrap().port();
-    let config = get_configuration().unwrap();
+    let mut config = get_configuration().unwrap();
 
-    let db_pool = PgPool::connect(&config.database.connection_string()).await.unwrap();
+    let db_pool = configure_database(&mut config.database).await;
     let clone = db_pool.clone();
 
+    // Spawn an instance of our app without blocking
     actix_rt::spawn(async move { run(listener, clone).unwrap().await.unwrap() });
 
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
         db_pool
     }
+}
+
+/// For test isolation, we create a logical database for each one, and return
+/// a pool of connections to it. Each database will have a random Uuid v4 as name
+///
+/// Note that this will modify the config that's passed, so it can be used afterwards
+async fn configure_database(config: &mut DatabaseSettings) -> PgPool {
+    config.database_name = Uuid::new_v4().to_string();
+
+    // Create the logical db
+    let query: &str = &format!("CREATE DATABASE \"{}\"", config.database_name);
+    PgConnection::connect(&config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres")
+        .execute(query)
+        .await
+        .expect("Failed to create temporary database");
+
+    // Run migrations on the database
+    let pool = PgPool::connect(&config.connection_string()).await.unwrap();
+    sqlx::migrate!("./migrations")
+        .run(&pool)
+        .await
+        .expect("Failed to run migrations on database");
+    pool
 }
 
 pub struct TestApp {
