@@ -1,6 +1,7 @@
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use sqlx::PgPool;
+use tracing::Instrument;
 use std::ops::Deref;
 use uuid::Uuid;
 
@@ -8,6 +9,14 @@ pub async fn create_post(
     post: web::Json<PostData>,
     connection: web::Data<PgPool>,
 ) -> Result<HttpResponse, HttpResponse> {
+    let req_span = tracing::info_span!(
+        "Adding a new post",
+        request_id = %Uuid::new_v4(),
+        title = %post.title,
+    );
+    let _req_span_guard = req_span.enter();
+
+    let query_span = tracing::info_span!("Saving a new post in the database");
     sqlx::query!(
         r#"
         INSERT INTO posts (id, title, content, created)
@@ -19,11 +28,13 @@ pub async fn create_post(
         Utc::now(),
     )
     .execute(connection.get_ref().deref())
+    .instrument(query_span)
     .await
     .map_err(|e| {
-        eprintln!("Failed to execute query: {}", e);
+        tracing::error!("Failed to execute query: {:?}", e);
         HttpResponse::InternalServerError().finish()
     })?;
+    tracing::info!("Post '{}' has been saved", post.title);
 
     Ok(HttpResponse::Ok().finish())
 }

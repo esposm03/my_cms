@@ -7,12 +7,18 @@ edition = "2018"
 [dependencies]
 actix-rt = "1.1.1"
 actix-web = { version = "3.3.2", default-features = false, features = [ "rustls" ] }
-chrono = "0.4.19"
-config = "0.10.1"
-serde = { version = "1.0.118", features = [ "derive" ] }
 sqlx = { version = "0.4.2", default-features = false, features = [ "runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate" ] }
+
+config = "0.10.1"
+chrono = "0.4.19"
+serde = { version = "1.0.118", features = [ "derive" ] }
 uuid = { version = "0.8.1", features = [ "v4" ] }
+
+log = "0.4.11"
+tracing = "0.1.22"
+tracing-subscriber = { version = "0.2.12", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.1.7"
+tracing-log = "0.1.1"
 
 [dev-dependencies]
 reqwest = { version = "0.10.10", default-features = false, features = [ "rustls-tls" ] }
-tokio = { version = "1.0.1", features = ["rt-multi-thread"] }
