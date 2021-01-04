@@ -1,7 +1,16 @@
-use my_cms::run;
+use my_cms::{configuration::get_configuration, run};
+use sqlx::PgPool;
 use std::net::TcpListener;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    run(TcpListener::bind("127.0.0.1:8000").expect("Can't bind to localhost:8000"))?.await
+    let configuration = get_configuration().expect("Failed to read configuration");
+    let address = format!("127.0.0.1:{}", configuration.app_port);
+
+    let listener = TcpListener::bind(address)?;
+    let connection = PgPool::connect(&configuration.database.connection_string())
+        .await
+        .unwrap();
+
+    run(listener, connection)?.await
 }
