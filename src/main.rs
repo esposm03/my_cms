@@ -8,7 +8,9 @@ async fn main() -> std::io::Result<()> {
     let address = format!("127.0.0.1:{}", configuration.app_port);
 
     let listener = TcpListener::bind(address)?;
-    let connection = PgPool::connect(&configuration.database.connection_string()).await.unwrap();
+    let connection = PgPool::connect(&configuration.database.connection_string())
+        .await
+        .unwrap();
 
     run(listener, connection)?.await
 }

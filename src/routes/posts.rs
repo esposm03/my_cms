@@ -1,10 +1,13 @@
 use actix_web::{web, HttpResponse};
-use sqlx::PgPool;
-use uuid::Uuid;
 use chrono::Utc;
+use sqlx::PgPool;
 use std::ops::Deref;
+use uuid::Uuid;
 
-pub async fn create_post(post: web::Json<PostData>, connection: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
+pub async fn create_post(
+    post: web::Json<PostData>,
+    connection: web::Data<PgPool>,
+) -> Result<HttpResponse, HttpResponse> {
     sqlx::query!(
         r#"
         INSERT INTO posts (id, title, content, created)

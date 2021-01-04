@@ -1,7 +1,10 @@
-use my_cms::{configuration::{DatabaseSettings, get_configuration}, run};
+use my_cms::{
+    configuration::{get_configuration, DatabaseSettings},
+    run,
+};
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use uuid::Uuid;
 use std::net::TcpListener;
+use uuid::Uuid;
 
 #[actix_rt::test]
 async fn health_check_works() {
@@ -86,7 +89,7 @@ async fn spawn_app() -> TestApp {
 
     TestApp {
         address: format!("http://127.0.0.1:{}", port),
-        db_pool
+        db_pool,
     }
 }
 
