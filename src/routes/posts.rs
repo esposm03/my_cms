@@ -1,8 +1,8 @@
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use sqlx::PgPool;
-use tracing::Instrument;
 use std::ops::Deref;
+use tracing::Instrument;
 use uuid::Uuid;
 
 pub async fn create_post(
