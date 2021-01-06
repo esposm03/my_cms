@@ -1,4 +1,4 @@
-use config::{Config, ConfigError, File};
+use config::{Config, ConfigError, File, FileFormat};
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -31,8 +31,24 @@ impl DatabaseSettings {
     }
 }
 
+/// Read the configuration from file, falling back to defaults.
+///
+/// This attempts to read a `configuration.yaml` file in the current directory,
+/// falling back to a default config if that one isn't found.
 pub fn get_configuration() -> Result<Settings, ConfigError> {
     let mut settings = Config::default();
-    settings.merge(File::with_name("configuration"))?;
+    settings.merge(File::from_str(
+        r#"
+                app_port: 8000
+                database:
+                    host: localhost
+                    port: 5432
+                    username: "postgres"
+                    password: "password"
+                    database_name: "cms"
+            "#,
+        FileFormat::Yaml,
+    ))?;
+    let _ = settings.merge(File::with_name("configuration"));
     settings.try_into()
 }
