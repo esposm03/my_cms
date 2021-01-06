@@ -46,6 +46,9 @@ jobs:
           override: true
           components: clippy
 
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v1
+
       - name: Cache sqlx
         uses: actions/cache@v2
         with:
@@ -54,10 +57,7 @@ jobs:
             ~/.cargo/bin/cargo-sqlx
           key: ${{ runner.os }}-sqlx-${{ hashFiles('~/.cargo/bin/sqlx', '~/.cargo/bin/cargo-sqlx') }}
       - name: Install/Update sqlx
-        run: cargo install sqlx-cli --no-default-features --features postgres
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v1
+        run: cargo install sqlx-cli --no-default-features --features postgres || true
 
       # Database setup
       - name: Migrate database
