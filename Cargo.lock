@@ -1337,6 +1337,7 @@ dependencies = [
  "actix-web",
  "chrono",
  "config",
+ "lazy_static",
  "log",
  "reqwest",
  "serde 1.0.118",
