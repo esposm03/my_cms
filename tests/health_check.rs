@@ -1,4 +1,8 @@
-use my_cms::{configuration::{get_configuration, DatabaseSettings}, run, telemetry::{get_subscriber, init_subscriber}};
+use my_cms::{
+    configuration::{get_configuration, DatabaseSettings},
+    run,
+    telemetry::{get_subscriber, init_subscriber},
+};
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
