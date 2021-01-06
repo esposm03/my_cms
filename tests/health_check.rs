@@ -1,10 +1,19 @@
 use my_cms::{
     configuration::{get_configuration, DatabaseSettings},
     run,
+    telemetry::{get_subscriber, init_subscriber},
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
+
+lazy_static::lazy_static! {
+    static ref TRACING: () = {
+        let filter = if std::env::var("TEST_LOG").is_ok() { "debug" } else { "" };
+        let subscriber = get_subscriber("test".into(), filter.into());
+        init_subscriber(subscriber);
+    };
+}
 
 #[actix_rt::test]
 async fn health_check_works() {
@@ -77,6 +86,8 @@ async fn create_post_missing_fields() {
 /// Run an instance of our API, without blocking the current thread,
 /// and return its address. Each instance will have its own logical database
 async fn spawn_app() -> TestApp {
+    lazy_static::initialize(&TRACING);
+
     let listener = TcpListener::bind("127.0.0.1:0").expect("Can't bind to random port");
     let port = listener.local_addr().unwrap().port();
     let mut config = get_configuration().unwrap();
