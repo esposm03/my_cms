@@ -1,0 +1,50 @@
+{
+  "db": "PostgreSQL",
+  "09b1b3b8cf9c7a0d131f07e9fe4132f13c1d7fa437e70e06bb0e7c70011954cb": {
+    "query": "SELECT title, content, created FROM posts WHERE id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "created",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "d1d555ea70272164393aa006a4764fa7be8512df4c7fbd13c5b6b93b953d1ac5": {
+    "query": "\n            INSERT INTO posts (id, title, content, created)\n            VALUES ($1, $2, $3, $4)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Timestamptz"
+        ]
+      },
+      "nullable": []
+    }
+  }
+}
