@@ -14,7 +14,7 @@ chrono = "0.4.19"
 serde = { version = "1.0.118", features = [ "derive" ] }
 uuid = { version = "0.8.1", features = [ "v4" ] }
 
-log = "0.4.11"
+log = "0.4.13"
 tracing = "0.1.22"
 tracing-futures = "0.2.4"
 tracing-subscriber = { version = "0.2.12", features = ["registry", "env-filter"] }
