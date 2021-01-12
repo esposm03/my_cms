@@ -64,6 +64,7 @@ jobs:
         run: SKIP_DOCKER=true ./scripts/init_db.sh
 
       - name: SQLX offline data check
+        run: cargo sqlx prepare --check -- --bin my_cms
 
       - name: Code coverage
         uses: actions-rs/tarpaulin@v0.1
