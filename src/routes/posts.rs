@@ -4,10 +4,13 @@ use actix_web::{
 };
 use sqlx::PgPool;
 
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use tracing::error;
 use uuid::Uuid;
+
+// Rustc complains about when, for some reason, `query!` isn't expanded
+#[allow(unused_imports)]
+use chrono::Utc;
 
 type Resp = Result<HttpResponse, HttpResponse>;
 

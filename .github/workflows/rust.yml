@@ -63,9 +63,6 @@ jobs:
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
 
-      - name: SQLX offline data check
-        run: cargo sqlx prepare --check -- --bin my_cms
-
       - name: Code coverage
         uses: actions-rs/tarpaulin@v0.1
         with:
@@ -103,8 +100,4 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Lint code
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
-          env: SQLX_OFFLINE=true
+        run: SQLX_OFFLINE=true cargo clippy
