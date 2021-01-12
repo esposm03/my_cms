@@ -7,12 +7,21 @@ edition = "2018"
 [dependencies]
 actix-rt = "1.1.1"
 actix-web = { version = "3.3.2", default-features = false, features = [ "rustls" ] }
-sqlx = { version = "0.4.2", default-features = false, features = [ "runtime-actix-rustls", "macros", "postgres", "uuid", "chrono", "migrate" ] }
+sqlx = { version = "0.4.2", default-features = false, features = [
+    "runtime-actix-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+    "offline",
+    "json",
+] }
 
 config = "0.10.1"
 chrono = "0.4.19"
 serde = { version = "1.0.119", features = [ "derive" ] }
-uuid = { version = "0.8.2", features = [ "v4" ] }
+uuid = { version = "0.8.2", features = [ "v4", "serde" ] }
 
 tracing = "0.1.22"
 tracing-futures = "0.2.4"
@@ -23,4 +32,4 @@ tracing-actix-web = "0.2.1"
 
 [dev-dependencies]
 lazy_static = "1.4.0"
-reqwest = { version = "0.10.10", default-features = false, features = [ "rustls-tls" ] }
+reqwest = { version = "0.10.10", default-features = false, features = [ "rustls-tls", "json" ] }

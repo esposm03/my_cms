@@ -689,6 +689,9 @@ name = "either"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
+dependencies = [
+ "serde 1.0.119",
+]
 
 [[package]]
 name = "encoding_rs"
@@ -1694,6 +1697,7 @@ dependencies = [
  "pin-project-lite 0.2.4",
  "rustls",
  "serde 1.0.119",
+ "serde_json",
  "serde_urlencoded",
  "tokio",
  "tokio-rustls",
@@ -1865,6 +1869,7 @@ version = "1.0.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fceb2595057b6891a4ee808f70054bd2d12f0e97f1cbb78689b59f676df325a"
 dependencies = [
+ "indexmap",
  "itoa",
  "ryu",
  "serde 1.0.119",
@@ -2027,6 +2032,8 @@ dependencies = [
  "percent-encoding",
  "rand",
  "rustls",
+ "serde 1.0.119",
+ "serde_json",
  "sha-1",
  "sha2",
  "smallvec",
@@ -2052,9 +2059,12 @@ dependencies = [
  "either",
  "futures",
  "heck",
+ "hex",
  "lazy_static",
  "proc-macro2",
  "quote",
+ "serde 1.0.119",
+ "serde_json",
  "sha2",
  "sqlx-core",
  "sqlx-rt",
@@ -2593,6 +2603,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 dependencies = [
  "getrandom 0.2.1",
+ "serde 1.0.119",
 ]
 
 [[package]]

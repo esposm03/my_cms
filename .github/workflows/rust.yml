@@ -23,7 +23,7 @@ jobs:
           args: --all -- --check
 
   test:
-    name: Test
+    name: Test & code coverage
     runs-on: ubuntu-latest
 
     services:
@@ -63,16 +63,7 @@ jobs:
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
 
-      - name: Test code
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-
-      - name: Lint code
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
+      - name: SQLX offline data check
 
       - name: Code coverage
         uses: actions-rs/tarpaulin@v0.1
@@ -83,3 +74,36 @@ jobs:
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  lint:
+    name: Lint with clippy
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: cms
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: clippy
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v1
+
+      - name: Lint code
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
+          env: SQLX_OFFLINE=true
