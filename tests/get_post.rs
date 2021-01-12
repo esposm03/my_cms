@@ -1,10 +1,10 @@
 mod common;
 use common::spawn_app;
 
+use chrono::Utc;
 use my_cms::routes::PostData;
 use sqlx::PgPool;
 use uuid::Uuid;
-use chrono::Utc;
 
 #[actix_rt::test]
 async fn get_post_works() {

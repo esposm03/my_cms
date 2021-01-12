@@ -1,9 +1,12 @@
-use actix_web::{HttpResponse, web::{Data, Json, Query}};
+use actix_web::{
+    web::{Data, Json, Query},
+    HttpResponse,
+};
 use sqlx::PgPool;
 
-use serde::{Serialize, Deserialize};
-use tracing::error;
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use tracing::error;
 use uuid::Uuid;
 
 type Resp = Result<HttpResponse, HttpResponse>;
@@ -37,9 +40,13 @@ pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> Resp {
         Err(e) => {
             error!("Database query failed: {:?}", e);
             Err(HttpResponse::InternalServerError().finish())
-        },
+        }
         Ok(r) => {
-            let conv = PostData {title: r.title, content: r.content, date: Some(r.created.to_rfc3339()) };
+            let conv = PostData {
+                title: r.title,
+                content: r.content,
+                date: Some(r.created.to_rfc3339()),
+            };
             Ok(HttpResponse::Ok().json(conv))
         }
     }
@@ -91,5 +98,5 @@ pub struct PostData {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PostId {
-    id: Uuid
+    id: Uuid,
 }
