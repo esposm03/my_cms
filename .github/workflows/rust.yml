@@ -46,9 +46,6 @@ jobs:
           override: true
           components: clippy
 
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v1
-
       - name: Cache sqlx
         uses: actions/cache@v2
         with:
@@ -95,9 +92,6 @@ jobs:
           toolchain: stable
           override: true
           components: clippy
-
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v1
 
       - name: Lint code
         run: SQLX_OFFLINE=true cargo clippy
