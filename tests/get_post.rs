@@ -2,7 +2,7 @@ mod common;
 use common::spawn_app;
 
 use chrono::Utc;
-use my_cms::routes::PostData;
+use my_cms::routes::Post;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -18,7 +18,7 @@ async fn get_post_works() {
         .unwrap();
     assert_eq!(response.status(), 200);
 
-    let response: PostData = response.json().await.unwrap();
+    let response: Post = response.json().await.unwrap();
     assert_eq!(response.title, "Lorem Ipsum");
     assert_eq!(response.content, "Dolor sit amet");
 }
