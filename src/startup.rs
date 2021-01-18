@@ -16,6 +16,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, io::Error> 
             .route("/health_check", web::get().to(routes::health_check))
             .route("/post", web::get().to(routes::get_post))
             .route("/post", web::post().to(routes::create_post))
+            .route("/posts", web::get().to(routes::get_all_posts))
             .app_data(db_pool.clone())
     })
     .listen(listener)?

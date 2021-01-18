@@ -4,8 +4,8 @@ use actix_web::{
 };
 use sqlx::PgPool;
 
-use serde::{Deserialize, Serialize};
 use chrono::DateTime;
+use serde::{Deserialize, Serialize};
 use tracing::error;
 use uuid::Uuid;
 
@@ -40,6 +40,22 @@ pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> impl Respon
 
     match query.fetch_one(&**conn).await {
         Err(sqlx::Error::RowNotFound) => Err(HttpResponse::NotFound()),
+        Err(e) => {
+            error!("Database query failed: {:?}", e);
+            Err(HttpResponse::InternalServerError())
+        }
+        Ok(r) => Ok(Json(r)),
+    }
+}
+
+/// Retrieve all of the posts in this blog
+#[tracing::instrument(name = "Requesting all posts")]
+pub async fn get_all_posts(conn: Data<PgPool>) -> impl Responder {
+    let query = sqlx::query_as!(PostReturnData, "SELECT * FROM posts")
+        .fetch_all(&**conn)
+        .await;
+
+    match query {
         Err(e) => {
             error!("Database query failed: {:?}", e);
             Err(HttpResponse::InternalServerError())
