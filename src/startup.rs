@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{dev::Server, web, App, HttpServer};
 use sqlx::PgPool;
 use std::{io, net::TcpListener};
@@ -11,6 +12,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, io::Error> 
     let server = HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger)
+            .wrap(Cors::permissive())
             .route("/health_check", web::get().to(routes::health_check))
             .route("/post", web::get().to(routes::get_post))
             .route("/post", web::post().to(routes::create_post))

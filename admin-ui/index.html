@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my_cms admin ui</title>
+</head>
+<body>
+    <form id="post-form">
+        Title: <input type="text" id="posttitle">
+        <textarea name="textarea" rows="5" cols="30" id="postcontent"></textarea>
+
+        <button type="button" id="bottone">Invia</button>
+    </form>
+
+    <form id="get-form">
+        ID: <input type="text" name="uuid">
+        <button type="button" id="get-button">Leggi post</button>
+
+        <div id="fetched-post"></div>
+    </form>
+</body>
+<script>
+    document.getElementById("bottone").addEventListener("click", () => {
+        let form = document.getElementById("post-form");
+
+        let json = JSON.stringify({
+            title: form.posttitle.value,
+            content: form.postcontent.value,
+        });
+
+        fetch("http://localhost:8000/post", { method: "POST", body: json, headers: { "Content-Type": "application/json" } })
+            .then(resp => resp.text())
+            .then(text => console.log(text))
+    })
+
+    document.getElementById("get-button").addEventListener("click", () => {
+        let form = document.getElementById("get-form");
+        let uuid = form.uuid.value;
+
+        fetch(`http://localhost:8000/post?id=${uuid}`)
+            .then(resp => resp.text())
+            .then(text => document.getElementById("fetched-post").innerHTML = text)
+    })
+</script>
+</html>
