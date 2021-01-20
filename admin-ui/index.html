@@ -4,43 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>my_cms admin ui</title>
+
+    <style>
+        form, div#list-form {
+            display: flex;
+            flex-direction: column;
+        }
+        button {
+            max-width: 300px;
+        }
+        input[type="text"] {
+            max-width: 600px;
+        }
+    </style>
 </head>
 <body>
-    <form id="post-form">
-        Title: <input type="text" id="posttitle">
-        <textarea name="textarea" rows="5" cols="30" id="postcontent"></textarea>
+    <button id="create-post-btn" type="button">Create a post</button>
+    <button id="list-posts-btn" type="button">List all posts</button>
+    <button id="read-post-btn" type="button">Read a post by ID</button>
 
-        <button type="button" id="bottone">Invia</button>
+    <h3 id="status">Waiting for user input</h3>
+
+    <form id="create-form">
+        Title: <input type="text" id="posttitle">
+        Content: <textarea name="textarea" rows="5" cols="30" id="postcontent"></textarea>
+
+        <button>Create post</button>
     </form>
 
     <form id="get-form">
         ID: <input type="text" name="uuid">
-        <button type="button" id="get-button">Leggi post</button>
-
-        <div id="fetched-post"></div>
+        <button>Read post</button>
     </form>
+
+
+    <div id="result"></div>
 </body>
 <script>
-    document.getElementById("bottone").addEventListener("click", () => {
-        let form = document.getElementById("post-form");
+    function setStatus(text) {
+        document.getElementById("result").innerHTML = text.replaceAll("\n", "<br>");
+    }
+
+    var crForm = document.getElementById("create-form");
+    var getForm = document.getElementById("get-form");
+
+    getForm.style.display = "none";
+    crForm.style.display = "none";
+
+    document.getElementById("create-post-btn").addEventListener("click", () => {
+        getForm.style.display = "none";
+        crForm.style.display = "flex";
+    })
+
+    document.getElementById("list-posts-btn").addEventListener("click", () => {
+        getForm.style.display = "none";
+        crForm.style.display = "none";
+
+        fetch("http://localhost:8000/posts")
+            .then(resp => resp.text())
+            .then(text => JSON.stringify(JSON.parse(text), undefined, 4))
+            .then(text => setStatus(text))
+    })
+
+    document.getElementById("read-post-btn").addEventListener("click", () => {
+        getForm.style.display = "flex";
+        crForm.style.display = "none";
+    })
+
+    crForm.addEventListener("submit", e => {
+        e.preventDefault();
 
         let json = JSON.stringify({
-            title: form.posttitle.value,
-            content: form.postcontent.value,
+            title: crForm.posttitle.value,
+            content: crForm.postcontent.value,
         });
 
         fetch("http://localhost:8000/post", { method: "POST", body: json, headers: { "Content-Type": "application/json" } })
             .then(resp => resp.text())
-            .then(text => console.log(text))
+            .then(text => JSON.stringify(JSON.parse(text), undefined, 4))
+            .then(text => setStatus("Posted: " + text));
     })
 
-    document.getElementById("get-button").addEventListener("click", () => {
-        let form = document.getElementById("get-form");
-        let uuid = form.uuid.value;
+    getForm.addEventListener("submit", e => {
+    	e.preventDefault();
+        let uuid = getForm.uuid.value;
 
         fetch(`http://localhost:8000/post?id=${uuid}`)
             .then(resp => resp.text())
-            .then(text => document.getElementById("fetched-post").innerHTML = text)
+            .then(text => JSON.stringify(JSON.parse(text), undefined, 4))
+            .then(text => setStatus(text))
     })
 </script>
 </html>
