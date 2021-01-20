@@ -2,10 +2,11 @@ use my_cms::{
     configuration::{get_configuration, DatabaseSettings},
     run,
 };
-use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+
+use sqlx::{Connection, Executor, PgConnection, PgPool};
+use tracing_subscriber::{fmt::Subscriber, EnvFilter};
 use uuid::Uuid;
-use tracing_subscriber::{EnvFilter, fmt::Subscriber};
 
 lazy_static::lazy_static! {
     static ref TRACING: () = {
