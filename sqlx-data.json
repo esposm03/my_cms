@@ -1,21 +1,62 @@
 {
   "db": "PostgreSQL",
-  "09b1b3b8cf9c7a0d131f07e9fe4132f13c1d7fa437e70e06bb0e7c70011954cb": {
-    "query": "SELECT title, content, created FROM posts WHERE id = $1",
+  "4f17c842c8407460631eca641dd51a5700463ba3d51a440c4fdaef2b9b9a87fe": {
+    "query": "SELECT * FROM posts",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
           "name": "title",
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
+          "ordinal": 2,
           "name": "content",
           "type_info": "Text"
         },
         {
+          "ordinal": 3,
+          "name": "created",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "4f2cbc0d98e4830f5dd2ded8e11b15aeda94139b89b9281c0da818dab7be35a3": {
+    "query": "SELECT id, title, content, created FROM posts WHERE id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
           "ordinal": 2,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
           "name": "created",
           "type_info": "Timestamptz"
         }
@@ -26,6 +67,7 @@
         ]
       },
       "nullable": [
+        false,
         false,
         false,
         false
