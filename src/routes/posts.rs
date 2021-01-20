@@ -19,8 +19,8 @@ use chrono::Utc;
 /// and as such returns an `HttpResponse`.
 #[tracing::instrument(
     name = "Adding a new post",
-    skip(post, conn),
     fields(request_id = %Uuid::new_v4(), title = %post.title)
+    skip(conn, post),
 )]
 pub async fn create_post(post: Json<PostSubmitData>, conn: Data<PgPool>) -> impl Responder {
     match insert_post(&post, &conn).await {
@@ -30,7 +30,7 @@ pub async fn create_post(post: Json<PostSubmitData>, conn: Data<PgPool>) -> impl
 }
 
 /// Retrieve a post from its ID, saved in the query as `post_id`
-#[tracing::instrument(name = "Requesting a post")]
+#[tracing::instrument(name = "Requesting a post", skip(conn))]
 pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> impl Responder {
     let query = sqlx::query_as!(
         PostReturnData,
@@ -49,7 +49,7 @@ pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> impl Respon
 }
 
 /// Retrieve all of the posts in this blog
-#[tracing::instrument(name = "Requesting all posts")]
+#[tracing::instrument(name = "Requesting all posts", skip(conn))]
 pub async fn get_all_posts(conn: Data<PgPool>) -> impl Responder {
     let query = sqlx::query_as!(PostReturnData, "SELECT * FROM posts")
         .fetch_all(&**conn)
@@ -70,7 +70,7 @@ pub async fn get_all_posts(conn: Data<PgPool>) -> impl Responder {
 /// insertion into the db. This is done to use the `tracing::instrument` attribute.
 #[tracing::instrument(
     name = "Saving a new post in the database",
-    skip(post, connection),
+    skip(connection, post),
     fields(title = %post.title)
 )]
 async fn insert_post(post: &PostSubmitData, connection: &PgPool) -> Result<Uuid, sqlx::Error> {

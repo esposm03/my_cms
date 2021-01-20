@@ -1,16 +1,14 @@
-use my_cms::{
-    configuration::get_configuration,
-    run,
-    telemetry::{get_subscriber, init_subscriber},
-};
+use tracing_subscriber::fmt::Subscriber;
 use sqlx::PgPool;
+
+use my_cms::{configuration::get_configuration, run};
 use std::net::TcpListener;
 
 #[actix_rt::main]
 async fn main() {
-    // Setup logging with `tracing`
-    let subscriber = get_subscriber("my_cms".into(), "info".into());
-    init_subscriber(subscriber);
+    Subscriber::builder()
+        .pretty()
+        .init();
 
     let configuration = get_configuration().expect("Failed to read configuration");
     let address = format!("127.0.0.1:{}", configuration.app_port);

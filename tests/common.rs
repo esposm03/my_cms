@@ -1,17 +1,18 @@
 use my_cms::{
     configuration::{get_configuration, DatabaseSettings},
     run,
-    telemetry::{get_subscriber, init_subscriber},
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
+use tracing_subscriber::{EnvFilter, fmt::Subscriber};
 
 lazy_static::lazy_static! {
     static ref TRACING: () = {
-        let filter = if std::env::var("TEST_LOG").is_ok() { "debug" } else { "" };
-        let subscriber = get_subscriber("test".into(), filter.into());
-        init_subscriber(subscriber);
+        Subscriber::builder()
+            .with_env_filter(EnvFilter::from_default_env())
+            .pretty()
+            .init();
     };
 }
 
