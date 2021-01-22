@@ -1,17 +1,20 @@
 use my_cms::{
     configuration::{get_configuration, DatabaseSettings},
     run,
-    telemetry::{get_subscriber, init_subscriber},
 };
-use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+
+use chrono::Utc;
+use sqlx::{Connection, Executor, PgConnection, PgPool};
+use tracing_subscriber::{fmt::Subscriber, EnvFilter};
 use uuid::Uuid;
 
 lazy_static::lazy_static! {
     static ref TRACING: () = {
-        let filter = if std::env::var("TEST_LOG").is_ok() { "debug" } else { "" };
-        let subscriber = get_subscriber("test".into(), filter.into());
-        init_subscriber(subscriber);
+        Subscriber::builder()
+            .with_env_filter(EnvFilter::from_default_env())
+            .pretty()
+            .init();
     };
 }
 
@@ -34,6 +37,31 @@ pub async fn spawn_app() -> TestApp {
         address: format!("http://127.0.0.1:{}", port),
         db_pool,
     }
+}
+
+/// Helper function. This directly inserts a post in the given
+/// database, with title "Lorem Ipsum" and content "Dolor sit
+/// amet", and returns its randomly-generated UUID
+#[allow(dead_code)]
+pub async fn insert_post(pool: &PgPool) -> Uuid {
+    let id = Uuid::new_v4();
+    let title = "Lorem Ipsum";
+    let content = "Dolor sit amet";
+
+    let query = sqlx::query!(
+        r#"
+            INSERT INTO posts (id, title, content, created)
+            VALUES ($1, $2, $3, $4)
+        "#,
+        id,
+        title,
+        content,
+        Utc::now(),
+    );
+
+    query.execute(pool).await.unwrap();
+
+    id
 }
 
 /// For test isolation, we create a logical database for each one, and return

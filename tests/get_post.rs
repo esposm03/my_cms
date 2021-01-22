@@ -1,9 +1,7 @@
 mod common;
-use common::spawn_app;
+use common::{insert_post, spawn_app};
 
-use chrono::Utc;
-use my_cms::routes::PostData;
-use sqlx::PgPool;
+use my_cms::routes::PostReturnData;
 use uuid::Uuid;
 
 #[actix_rt::test]
@@ -18,7 +16,7 @@ async fn get_post_works() {
         .unwrap();
     assert_eq!(response.status(), 200);
 
-    let response: PostData = response.json().await.unwrap();
+    let response: PostReturnData = response.json().await.unwrap();
     assert_eq!(response.title, "Lorem Ipsum");
     assert_eq!(response.content, "Dolor sit amet");
 }
@@ -48,28 +46,4 @@ async fn get_post_no_id() {
         .await
         .unwrap();
     assert_eq!(response.status(), 400);
-}
-
-/// Helper function. This directly inserts a post in the given
-/// database, with title "Lorem Ipsum" and content "Dolor sit
-/// amet", and returns its randomly-generated UUID
-async fn insert_post(pool: &PgPool) -> Uuid {
-    let id = Uuid::new_v4();
-    let title = "Lorem Ipsum";
-    let content = "Dolor sit amet";
-
-    let query = sqlx::query!(
-        r#"
-            INSERT INTO posts (id, title, content, created)
-            VALUES ($1, $2, $3, $4)
-        "#,
-        id,
-        title,
-        content,
-        Utc::now(),
-    );
-
-    query.execute(pool).await.unwrap();
-
-    id
 }

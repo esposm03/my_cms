@@ -1,57 +1,66 @@
 use actix_web::{
     web::{Data, Json, Query},
-    HttpResponse,
+    HttpResponse, Responder,
 };
 use sqlx::PgPool;
 
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use tracing::error;
 use uuid::Uuid;
 
-// Rustc complains about when, for some reason, `query!` isn't expanded
+// Rustc complains about this when, for some reason, `query!` isn't expanded
 #[allow(unused_imports)]
 use chrono::Utc;
 
-type Resp = Result<HttpResponse, HttpResponse>;
-
-/// Create a new post in the database, with the given data as input.
+/// Create a new post in the database, with the given data as input, and return its UUID.
 ///
 /// This is a handler: it is called by `actix` when a matching request arrives,
 /// and as such returns an `HttpResponse`.
 #[tracing::instrument(
     name = "Adding a new post",
-    skip(post, conn),
     fields(request_id = %Uuid::new_v4(), title = %post.title)
+    skip(conn, post),
 )]
-pub async fn create_post(post: Json<PostData>, conn: Data<PgPool>) -> Resp {
+pub async fn create_post(post: Json<PostSubmitData>, conn: Data<PgPool>) -> impl Responder {
     match insert_post(&post, &conn).await {
-        Ok(uuid) => Ok(HttpResponse::Ok().body(uuid.to_string())),
-        Err(_) => Err(HttpResponse::InternalServerError().finish()),
+        Ok(uuid) => Ok(uuid.to_string()),
+        Err(_) => Err(HttpResponse::InternalServerError()),
     }
 }
 
-/// Retrieve a post from its ID
-#[tracing::instrument(name = "Requesting a post")]
-pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> Resp {
-    let query = sqlx::query!(
-        r#"SELECT title, content, created FROM posts WHERE id = $1"#,
+/// Retrieve a post from its ID, saved in the query as `post_id`
+#[tracing::instrument(name = "Requesting a post", skip(conn))]
+pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> impl Responder {
+    let query = sqlx::query_as!(
+        PostReturnData,
+        r#"SELECT id, title, content, created FROM posts WHERE id = $1"#,
         post_id.id,
     );
 
     match query.fetch_one(&**conn).await {
-        Err(sqlx::Error::RowNotFound) => Err(HttpResponse::NotFound().finish()),
+        Err(sqlx::Error::RowNotFound) => Err(HttpResponse::NotFound()),
         Err(e) => {
             error!("Database query failed: {:?}", e);
-            Err(HttpResponse::InternalServerError().finish())
+            Err(HttpResponse::InternalServerError())
         }
-        Ok(r) => {
-            let conv = PostData {
-                title: r.title,
-                content: r.content,
-                date: Some(r.created.to_rfc3339()),
-            };
-            Ok(HttpResponse::Ok().json(conv))
+        Ok(r) => Ok(Json(r)),
+    }
+}
+
+/// Retrieve all of the posts in this blog
+#[tracing::instrument(name = "Requesting all posts", skip(conn))]
+pub async fn get_all_posts(conn: Data<PgPool>) -> impl Responder {
+    let query = sqlx::query_as!(PostReturnData, "SELECT * FROM posts")
+        .fetch_all(&**conn)
+        .await;
+
+    match query {
+        Err(e) => {
+            error!("Database query failed: {:?}", e);
+            Err(HttpResponse::InternalServerError())
         }
+        Ok(r) => Ok(Json(r)),
     }
 }
 
@@ -61,10 +70,10 @@ pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> Resp {
 /// insertion into the db. This is done to use the `tracing::instrument` attribute.
 #[tracing::instrument(
     name = "Saving a new post in the database",
-    skip(post, connection),
+    skip(connection, post),
     fields(title = %post.title)
 )]
-async fn insert_post(post: &PostData, connection: &PgPool) -> Result<Uuid, sqlx::Error> {
+async fn insert_post(post: &PostSubmitData, connection: &PgPool) -> Result<Uuid, sqlx::Error> {
     let post_id = Uuid::new_v4();
 
     let res = sqlx::query!(
@@ -93,10 +102,17 @@ async fn insert_post(post: &PostData, connection: &PgPool) -> Result<Uuid, sqlx:
 /// in ISO 8601 format, obtainable by calling the `to_rfc3339()` method
 /// on any of `chrono`'s types.
 #[derive(Deserialize, Serialize, Debug)]
-pub struct PostData {
+pub struct PostReturnData {
     pub title: String,
     pub content: String,
-    pub date: Option<String>,
+    pub created: DateTime<Utc>,
+    pub id: Uuid,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PostSubmitData {
+    pub title: String,
+    pub content: String,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
