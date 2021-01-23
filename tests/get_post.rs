@@ -10,7 +10,7 @@ async fn get_post_works() {
     let id = insert_post(&app.db_pool).await;
 
     let response = reqwest::Client::new()
-        .get(&format!("{}/post?id={}", app.address, id))
+        .get(&format!("{}/post/{}", app.address, id))
         .send()
         .await
         .unwrap();
@@ -28,7 +28,7 @@ async fn get_post_wrong_id() {
     let id = Uuid::new_v4();
 
     let response = reqwest::Client::new()
-        .get(&format!("{}/post?id={}", app.address, id))
+        .get(&format!("{}/post/{}", app.address, id))
         .send()
         .await
         .unwrap();
@@ -45,5 +45,5 @@ async fn get_post_no_id() {
         .send()
         .await
         .unwrap();
-    assert_eq!(response.status(), 400);
+    assert!(response.status().is_client_error());
 }

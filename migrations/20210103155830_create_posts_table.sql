@@ -1,4 +1,3 @@
--- Create posts table
 CREATE TABLE posts (
     id uuid NOT NULL,
     PRIMARY KEY (id),

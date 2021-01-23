@@ -37,7 +37,7 @@ async fn list_posts_empty() {
 
     assert!(response.status().is_success());
 
-    let response = response.json::<Vec<PostReturnData>>().await.unwrap();
+    let response: Vec<PostReturnData> = response.json().await.unwrap();
     assert_eq!(response.len(), 0);
 }
 

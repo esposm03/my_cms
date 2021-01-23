@@ -81,7 +81,6 @@
 
         fetch("http://localhost:8000/post", { method: "POST", body: json, headers: { "Content-Type": "application/json" } })
             .then(resp => resp.text())
-            .then(text => JSON.stringify(JSON.parse(text), undefined, 4))
             .then(text => setStatus("Posted: " + text));
     })
 
@@ -89,7 +88,7 @@
     	e.preventDefault();
         let uuid = getForm.uuid.value;
 
-        fetch(`http://localhost:8000/post?id=${uuid}`)
+        fetch(`http://localhost:8000/post/${uuid}`)
             .then(resp => resp.text())
             .then(text => JSON.stringify(JSON.parse(text), undefined, 4))
             .then(text => setStatus(text))

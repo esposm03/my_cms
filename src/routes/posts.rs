@@ -1,5 +1,7 @@
+//! Routes related to posts
+
 use actix_web::{
-    web::{Data, Json, Query},
+    web::{Data, Json, Path},
     HttpResponse, Responder,
 };
 use sqlx::PgPool;
@@ -13,15 +15,10 @@ use uuid::Uuid;
 #[allow(unused_imports)]
 use chrono::Utc;
 
-/// Create a new post in the database, with the given data as input, and return its UUID.
+/// Create a new post and return its id
 ///
-/// This is a handler: it is called by `actix` when a matching request arrives,
-/// and as such returns an `HttpResponse`.
-#[tracing::instrument(
-    name = "Adding a new post",
-    fields(request_id = %Uuid::new_v4(), title = %post.title)
-    skip(conn, post),
-)]
+/// This route should be mounted as `POST /post`
+#[tracing::instrument(name = "Adding a new post", fields(title = %post.title), skip(conn, post))]
 pub async fn create_post(post: Json<PostSubmitData>, conn: Data<PgPool>) -> impl Responder {
     match insert_post(&post, &conn).await {
         Ok(uuid) => Ok(uuid.to_string()),
@@ -29,13 +26,15 @@ pub async fn create_post(post: Json<PostSubmitData>, conn: Data<PgPool>) -> impl
     }
 }
 
-/// Retrieve a post from its ID, saved in the query as `post_id`
+/// Retrieve a post from its id, saved in the query as `post_id`
+///
+/// This route should be mounted as a `GET /post`
 #[tracing::instrument(name = "Requesting a post", skip(conn))]
-pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> impl Responder {
+pub async fn get_post(id: Path<Uuid>, conn: Data<PgPool>) -> impl Responder {
     let query = sqlx::query_as!(
         PostReturnData,
         r#"SELECT id, title, content, created FROM posts WHERE id = $1"#,
-        post_id.id,
+        *id,
     );
 
     match query.fetch_one(&**conn).await {
@@ -48,7 +47,9 @@ pub async fn get_post(post_id: Query<PostId>, conn: Data<PgPool>) -> impl Respon
     }
 }
 
-/// Retrieve all of the posts in this blog
+/// Retrieve all the posts
+///
+/// This route should be mounted as `GET /posts`
 #[tracing::instrument(name = "Requesting all posts", skip(conn))]
 pub async fn get_all_posts(conn: Data<PgPool>) -> impl Responder {
     let query = sqlx::query_as!(PostReturnData, "SELECT * FROM posts")
@@ -98,9 +99,7 @@ async fn insert_post(post: &PostSubmitData, connection: &PgPool) -> Result<Uuid,
     }
 }
 
-/// The data associated with a post. `date` should contain a date
-/// in ISO 8601 format, obtainable by calling the `to_rfc3339()` method
-/// on any of `chrono`'s types.
+/// Data returned to the user when fetching a post
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PostReturnData {
     pub title: String,
@@ -109,13 +108,9 @@ pub struct PostReturnData {
     pub id: Uuid,
 }
 
+/// Data submitted by a user when creating a post
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PostSubmitData {
     pub title: String,
     pub content: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct PostId {
-    id: Uuid,
 }

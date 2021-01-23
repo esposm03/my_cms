@@ -58,7 +58,7 @@ jobs:
 
       # Database setup
       - name: Migrate database
-        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        run: SKIP_DOCKER=true ./init_db.sh
 
       - name: Code coverage
         uses: actions-rs/tarpaulin@v0.1

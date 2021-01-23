@@ -1,6 +1,8 @@
-use actix_web::HttpResponse;
+//! Health check request
 
-/// A really simple route, that always returns 200, just for health checking
-pub async fn health_check() -> HttpResponse {
-    HttpResponse::Ok().finish()
+use actix_web::{HttpResponse, Responder};
+
+/// A really simple route, that always returns 200, used to check the service status
+pub async fn health_check() -> impl Responder {
+    HttpResponse::Ok()
 }
