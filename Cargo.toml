@@ -7,16 +7,7 @@ edition = "2018"
 [dependencies]
 actix-rt = "1.1.1"
 actix-web = { version = "3.3.2", default-features = false, features = [ "rustls" ] }
-sqlx = { version = "0.4.2", default-features = false, features = [
-    "runtime-actix-rustls",
-    "macros",
-    "postgres",
-    "uuid",
-    "chrono",
-    "migrate",
-    "offline",
-    "json",
-] }
+juniper = "0.15.3"
 
 actix-cors = "0.5.4"
 config = "0.10.1"
@@ -28,6 +19,7 @@ tracing = "0.1"
 tracing-actix-web = "0.2"
 tracing-futures = "0.2"
 tracing-subscriber = { version = "0.2", features = ["registry", "env-filter", "tracing-log", "json"] }
+juniper_actix = "0.2.3"
 
 [dev-dependencies]
 lazy_static = "1.4.0"

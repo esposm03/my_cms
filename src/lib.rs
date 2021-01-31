@@ -12,11 +12,12 @@
 //! To start the server, just call the function [`run`] with a [`TcpListener`] and a database connection.
 
 pub mod configuration;
+pub mod graphql;
 pub mod routes;
 
 use actix_cors::Cors;
-use actix_web::{dev::Server, web, App, HttpServer};
-use sqlx::PgPool;
+use actix_web::{App, HttpServer, dev::Server, web};
+use graphql::{build_schema, graphiql_route, graphql_route};
 use std::{io, net::TcpListener};
 use tracing_actix_web::TracingLogger;
 
@@ -24,21 +25,16 @@ use tracing_actix_web::TracingLogger;
 ///
 /// This function takes a [`TcpListener`] and returns a server to be
 /// `.await`ed by the caller, for testing reasons.
-pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, io::Error> {
-    let db_pool = web::Data::new(db_pool);
-
-    let server = HttpServer::new(move || {
+pub fn run(listener: TcpListener) -> Result<Server, io::Error> {
+    Ok(HttpServer::new(move || {
         App::new()
             .wrap(TracingLogger)
             .wrap(Cors::permissive())
             .route("/health_check", web::get().to(routes::health_check))
-            .route("/post/{id}", web::get().to(routes::get_post))
-            .route("/post", web::post().to(routes::create_post))
-            .route("/posts", web::get().to(routes::get_all_posts))
-            .app_data(db_pool.clone())
+            .route("/graphql", web::to(graphql_route))
+            .route("/graphiql", web::to(graphiql_route))
+            .data(build_schema())
     })
     .listen(listener)?
-    .run();
-
-    Ok(server)
+    .run())
 }
