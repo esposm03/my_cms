@@ -12,6 +12,7 @@
 //! To start the server, just call the function [`run`] with a [`TcpListener`] and a database connection.
 
 pub mod configuration;
+pub mod collection;
 pub mod graphql;
 pub mod routes;
 

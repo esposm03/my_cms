@@ -1,6 +1,6 @@
+use crate::collection::Entry;
 use actix_web::{HttpRequest, Responder, web};
-use juniper::{EmptyMutation, EmptySubscription, FieldResult, RootNode, graphql_object};
-
+use juniper::{DefaultScalarValue, EmptyMutation, EmptySubscription, FieldResult, GraphQLValue, RootNode, graphql_object};
 
 /// Handler for the `/graphql` route
 pub async fn graphql_route(req: HttpRequest, payload: web::Payload, schema: web::Data<Schema>) -> impl Responder {
@@ -20,17 +20,18 @@ pub fn build_schema() -> Schema {
 
 pub type Schema = RootNode<'static, Query, EmptyMutation<Context>, EmptySubscription<Context>>;
 
-pub struct Context(Vec<String>);
+pub struct Context(Vec<Entry>);
 
 pub struct Query;
 #[graphql_object(context = Context)]
 impl Query {
-    fn entries(context: &Context, collection: String) -> FieldResult<&str> {
-        context
-            .0
-            .iter()
-            .find(|&i| i == &collection)
-            .map(|i| i.as_str())
-            .ok_or(0.into())
+    fn entries(context: &Context, collection: String) -> FieldResult<Vec<Entry>> {
+        Ok(
+            context.0
+                .iter()
+                .filter(|e| e.type_name(&"Hello".into()).unwrap() == collection)
+                .cloned()
+                .collect()
+        )
     }
 }
