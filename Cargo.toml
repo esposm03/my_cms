@@ -5,9 +5,9 @@ authors = ["esposm03 <36164633+esposm03@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-actix-rt = "1.1.1"
-actix-web = { version = "3.3.2", default-features = false, features = [ "rustls" ] }
-sqlx = { version = "0.4.2", default-features = false, features = [
+actix-rt = "2.0.2"
+actix-web = { version = "4.0.0-beta.3", default-features = false, features = [ "rustls" ] }
+sqlx = { version = "0.5.1", default-features = false, features = [
     "runtime-actix-rustls",
     "macros",
     "postgres",
@@ -18,17 +18,16 @@ sqlx = { version = "0.4.2", default-features = false, features = [
     "json",
 ] }
 
-actix-cors = "0.5.4"
 config = "0.10.1"
 chrono = { version = "0.4.19", features = [ "serde" ] }
 serde = { version = "1.0.123", features = [ "derive" ] }
 uuid = { version = "0.8.2", features = [ "v4", "serde" ] }
 
 tracing = "0.1"
-tracing-actix-web = "0.2"
+tracing-actix-web = "0.3.0-beta.2"
 tracing-futures = "0.2"
 tracing-subscriber = { version = "0.2", features = ["registry", "env-filter", "tracing-log", "json"] }
 
 [dev-dependencies]
 lazy_static = "1.4.0"
-reqwest = { version = "0.10.10", default-features = false, features = [ "rustls-tls", "json" ] }
+reqwest = { version = "0.11", default-features = false, features = [ "rustls-tls", "json" ] }

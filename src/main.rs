@@ -4,7 +4,7 @@ use tracing_subscriber::fmt::Subscriber;
 use my_cms::{configuration::get_configuration, run};
 use std::net::TcpListener;
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() {
     Subscriber::builder().pretty().init();
 
