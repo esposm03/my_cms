@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 actix-rt = "2.1.0"
-actix-web = { version = "4.0.0-beta.3", default-features = false, features = [ "rustls" ] }
+actix-web = { version = "4.0.0-beta.4", default-features = false, features = [ "rustls" ] }
 sqlx = { version = "0.5.1", default-features = false, features = [
     "runtime-actix-rustls",
     "macros",
