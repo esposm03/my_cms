@@ -5,7 +5,7 @@ authors = ["esposm03 <36164633+esposm03@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-actix-rt = "2.1.0"
+actix-rt = "2.2.0"
 actix-web = { version = "4.0.0-beta.4", default-features = false, features = [ "rustls" ] }
 sqlx = { version = "0.5.1", default-features = false, features = [
     "runtime-actix-rustls",
